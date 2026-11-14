@@ -9,6 +9,7 @@ from app.db.postgres import Base, engine
 from app.db.qdrant import qdrant_client
 from app.db.redis import redis_client
 from app.models.document import Document
+from app.models.booking import Booking
 from app.api.routes.documents import router as documents_router
 
 

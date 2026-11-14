@@ -1,7 +1,10 @@
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
+from app.db.postgres import get_db
 from app.schemas.chat import ChatRequest, ChatResponse
+from app.services.booking_service import handle_booking
 from app.services.rag_service import answer_question
 
 
@@ -9,14 +12,26 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 @router.post("/", response_model=ChatResponse)
-def chat(request: ChatRequest) -> ChatResponse:
-    """Handle conversational RAG requests."""
+def chat(
+    request: ChatRequest,
+    db: Session = Depends(get_db),
+) -> ChatResponse:
+    """Handle conversational RAG and interview booking requests."""
 
     try:
-        answer = answer_question(
-            question=request.question,
+        booking_answer = handle_booking(
             conversation_id=request.conversation_id,
+            question=request.question,
+            db=db,
         )
+
+        if booking_answer:
+            answer = booking_answer
+        else:
+            answer = answer_question(
+                question=request.question,
+                conversation_id=request.conversation_id,
+            )
 
         return ChatResponse(
             conversation_id=request.conversation_id,
