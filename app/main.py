@@ -1,6 +1,6 @@
 
 from contextlib import asynccontextmanager
-
+from app.api.routes.chat import router as chat_router
 from fastapi import FastAPI
 from sqlalchemy import text
 
@@ -48,6 +48,7 @@ app = FastAPI(
 
 # Register document ingestion API
 app.include_router(documents_router)
+app.include_router(chat_router)
 
 
 @app.get("/health", tags=["Health"])
